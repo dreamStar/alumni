@@ -255,7 +255,7 @@ def check_admin(user_id):
 check if the user id is already in database
 user_id:int
 """
-def query_classmate(user_id, name = None):
+def check_classmate(user_id, name = None):
     tmp = models.classmate_wechat_id.objects.filter(wechat_id = user_id)
     if tmp and len(tmp) > 0 :
 	    if name != None:
@@ -269,19 +269,24 @@ def query_classmate(user_id, name = None):
 set new password
 new_pw:utf-8 str,new password, only letters and numbers, more than six characters.
 """
-def set_new_password(new_pw,msg = None):
+def set_new_password(new_pw,msg = None,is_admin = True):
     pattern = re.compile('^[0-9a-zA-Z]{6,}$',re.I)
     if not pattern.match(new_pw):
         if msg:
             return get_msg_response(resource.text_pw_format_error,msg)
         else:
             return False
-    pw = models.params.objects.filter(param_name = 'password')
+	pname = None
+    if is_admin:
+	    pname = 'admin_password'
+	else:
+	    pname = 'classmate_password'
+    pw = models.params.objects.filter(param_name = pname)
     if pw and len(pw)>0:
         pw[0].param_value = new_pw
         pw[0].save()
     else:
-        pw = models.params(param_name = 'password', param_value = new_pw)
+        pw = models.params(param_name = pname, param_value = new_pw)
         pw.save()
     if msg:
         return get_msg_response(resource.text_pw_set_ok,msg)
@@ -294,7 +299,7 @@ pw:utf-8 str,password.
 msg:request dict. 
 """
 def admin_reg(pw,msg):
-    right_pw = models.params.objects.filter(param_name = 'password')
+    right_pw = models.params.objects.filter(param_name = 'admin_password')
     if right_pw and len(right_pw) > 0:
         if right_pw[0].param_value != pw:
             return get_msg_response(resource.text_pw_error,msg)
@@ -350,11 +355,11 @@ modify password. only admin user could do this.
 new_pw: utf-8 str, new password.
 msg:request dict.
 """       
-def modify_password(new_pw,msg):
-    if not query_admin(msg['FromUserName'].text):
+def modify_password(new_pw, is_admin, msg):
+    if not check_admin(msg['FromUserName'].text):
         return get_msg_response(resource.text_no_author_error,msg)
     else:
-        return set_new_password(new_pw,msg)
+        return set_new_password(new_pw, is_admin, msg)
 
 """
 handle upload file.
@@ -472,6 +477,10 @@ def process_cmd(cmd,msg):
 	    return classmate_logout(msg)
     elif cnt == 2 and cmd_array[0].lower() == 'logout' and cmd_array[1].lower() == 'admin':
 	    return admin_logout(msg)
+	elif cnt == 2 and cmd_array[0].lower() == 'reset':
+	    return modify_password(cmd_array[1], False, msg)
+	elif cnt == 3 and cmd_array[0].lower() == 'reset' and cmd_array[1] == 'admin':
+	    return modify_password(cmd_array[2], True, msg)
 	elif cnt == 1:
 	    return query_person(cmd_array[0],msg)
     
