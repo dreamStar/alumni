@@ -174,31 +174,44 @@ def get_msg_response(ret_str,msg):
     return render_to_response('reply_msg.xml', ret_dic, mimetype="application/xml")
 
 """
-called when the requestion is querying a person's schedule.
-query: utf-8 str, the person's name
-date_num: int, the date number
+get the list of all the classmates.
 msg: request dict.
 """
-def query_person(query, date_num, msg):
-    query_rets = models.paibantable.objects.filter(name = query, date = date_num)
+def get_classmate_list(msg):
+    query_rets = models.classmate_info.objects.all()
+	names = [person.name + '\n' for person in query_rets if person.name != None and person.name != ""]
+    return get_msg_response("".join(names),msg)
+	
+"""
+called when the requestion is querying a person's schedule.
+query: utf-8 str, the person's name
+msg: request dict.
+"""
+def query_person(query, user_id, msg):
+    if not check_classmate(msg['FromUserName'].text):
+	    return get_msg_response(resource.text_not_classmate,msg)
+    query_rets = models.classmate_info.objects.filter(name = query)
     if query_rets == None or len(query_rets) == 0:
         return get_msg_response(resource.text_no_person_error,msg)
 
     query_ret = query_rets[0]
-    date_infos = models.datetable.objects.filter(date = date_num)
-    if date_infos == None or len(date_infos) == 0:
-        return get_msg_response(resource.text_cmd_error,msg)
-    date_info = date_infos[0]
     
     ret = ["姓名："]
     ret.append(query_ret.name)
-    ret.append('\n日期：')
-    ret.append(get_month())
-    ret.append('月')
-    ret.append(str(date_num) + '日 ')
+    ret.append('\n性别：')
+    ret.append(query_ret.sex)
+    ret.append('\n地址：')
+    ret.append(query_ret.)
     ret.append(date_info.info)
     ret.append('\n排班信息：')
     ret.append(query_ret.info)
+	
+	query_key = [('姓名',query_ret.name),('性别',query_ret.sex),('地址',query_ret.address),('联系电话',query_ret.tel),('QQ',query_ret.qq),('微信',query_ret.wechat),('邮箱',query_ret.email),('行业',query_ret.field),('公司',query_ret.company),('寄语',query_ret.words)]
+	ret = []
+	for key in query_key:
+	    if key[1] != None and key[1] != "":
+		    ret.append(key[0]+':'+key[1]+'\n')
+	
     return get_msg_response("".join(ret),msg)
 """
 def query_person(query,date_num,msg):
@@ -231,13 +244,24 @@ def on_subscript(msg):
 check if the user id is already in database
 user_id:int
 """
-def query_admin(user_id):
-    tmp = models.admins.objects.filter(admin_id = user_id)
+def check_admin(user_id):
+    tmp = models.admin_id.objects.filter(wechat_id = user_id)
     if tmp and len(tmp) > 0 :
         return True
     else:
         return False
-        
+
+"""
+check if the user id is already in database
+user_id:int
+"""
+def query_classmate(user_id):
+    tmp = models.classmate_wechat_id.objects.filter(wechat_id = user_id)
+    if tmp and len(tmp) > 0 :
+        return True
+    else:
+        return False
+		
 """
 set new password
 new_pw:utf-8 str,new password, only letters and numbers, more than six characters.
@@ -288,6 +312,26 @@ def admin_logout(msg):
         return get_msg_response(resource.text_admin_logout_ok,msg)
     else:
         return get_msg_response(resource.text_no_author_error,msg)
+		
+"""
+classmate account register.
+pw:utf-8 str,password.
+msg:request dict. 
+"""
+def classmate_reg(pw,msg):
+    right_pw = models.params.objects.filter(param_name = 'classmate_password')
+    if right_pw and len(right_pw) > 0:
+        if right_pw[0].param_value != pw:
+            return get_msg_response(resource.text_pw_error,msg)
+        else:
+            if check_classmate(msg['FromUserName'].text):
+                return get_msg_response(resource.text_classmate_exsited,msg)
+            else:
+                new_classmate = models.classmate_wechat_id(wechat_id = msg['FromUserName'].text)
+                new_classmate.save()
+                return get_msg_response(resource.text_classmate_reg_ok,msg)
+    else:
+        return get_msg_response(resource.text_no_classmate_password,msg)
 
 """
 modify password. only admin user could do this.
@@ -389,6 +433,7 @@ msg:request dict.
 def process_cmd(cmd,msg):
     cmd_array = cmd.strip().split()
     cnt = len(cmd_array)
+	"""
     if cnt == 2 and cmd_array[0].lower() == 'reg':
         return admin_reg(cmd_array[1],msg)
     elif cnt == 1 and cmd_array[0].lower() == 'ad':
@@ -403,6 +448,14 @@ def process_cmd(cmd,msg):
         return modify_month(int(cmd_array[1]),msg)
     elif cnt == 2 and cmd_array[1].isdigit():
         return query_person(cmd_array[0],int(cmd_array[1]),msg)  
+	"""
+	
+	if cnt == 1 and cmd_array[0] == u'名单':
+		return get_classmate_list(cmd_array[1],msg)
+	elif cnt == 2 and cmd_array[0] == 'reg':
+	    return classmate_reg(msg)
+	elif cnt == 1:
+	    return query_person(cmd_array[0],msg)
     
     return get_msg_response(resource.text_cmd_error,msg)
     
