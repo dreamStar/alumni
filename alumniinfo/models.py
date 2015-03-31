@@ -12,6 +12,7 @@ class admin_id(models.Model):
 	
 class classmate_wechat_id(models.Model):
     wechat_id = models.CharField(max_length=200, unique = True, db_index = True)
+	name = models.CharField(max_length=10, unique = True, db_index = True)
     
 class classmate_info(models.Model):
     name = models.CharField(max_length = 50, db_index = True)

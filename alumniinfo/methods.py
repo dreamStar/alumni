@@ -255,12 +255,15 @@ def check_admin(user_id):
 check if the user id is already in database
 user_id:int
 """
-def query_classmate(user_id):
+def query_classmate(user_id, name = None):
     tmp = models.classmate_wechat_id.objects.filter(wechat_id = user_id)
     if tmp and len(tmp) > 0 :
-        return True
-    else:
-        return False
+	    if name != None:
+		    if tmp[0].name == name:
+                return True			
+		else:
+            return True
+    return False
 		
 """
 set new password
@@ -299,14 +302,14 @@ def admin_reg(pw,msg):
             if query_admin(msg['FromUserName'].text):
                 return get_msg_response(resource.text_admin_exsited,msg)
             else:
-                new_admin = models.admins(admin_id = msg['FromUserName'].text)
+                new_admin = models.admin_id(wechat_id = msg['FromUserName'].text)
                 new_admin.save()
                 return get_msg_response(resource.text_admin_reg_ok,msg)
     else:
         return set_new_password(pw,msg)
         
 def admin_logout(msg):
-    tmp = models.admins.objects.filter(admin_id = msg['FromUserName'].text)
+    tmp = models.admin_id.objects.filter(wechat_id = msg['FromUserName'].text)
     if tmp and len(tmp) > 0 :
         tmp[0].delete()
         return get_msg_response(resource.text_admin_logout_ok,msg)
@@ -316,9 +319,10 @@ def admin_logout(msg):
 """
 classmate account register.
 pw:utf-8 str,password.
+name:utf-8 str, name of classmates.
 msg:request dict. 
 """
-def classmate_reg(pw,msg):
+def classmate_reg(pw, name, msg):
     right_pw = models.params.objects.filter(param_name = 'classmate_password')
     if right_pw and len(right_pw) > 0:
         if right_pw[0].param_value != pw:
@@ -327,11 +331,19 @@ def classmate_reg(pw,msg):
             if check_classmate(msg['FromUserName'].text):
                 return get_msg_response(resource.text_classmate_exsited,msg)
             else:
-                new_classmate = models.classmate_wechat_id(wechat_id = msg['FromUserName'].text)
+                new_classmate = models.classmate_wechat_id(wechat_id = msg['FromUserName'].text, name = name)
                 new_classmate.save()
                 return get_msg_response(resource.text_classmate_reg_ok,msg)
     else:
         return get_msg_response(resource.text_no_classmate_password,msg)
+		
+def classmate_logout(msg):
+    tmp = models.classmate_wechat_id.objects.filter(wechat_id = msg['FromUserName'].text)
+    if tmp and len(tmp) > 0 :
+        tmp[0].delete()
+        return get_msg_response(resource.text_classmate_logout_ok,msg)
+    else:
+        return get_msg_response(resource.text_not_classmate,msg)
 
 """
 modify password. only admin user could do this.
@@ -452,8 +464,14 @@ def process_cmd(cmd,msg):
 	
 	if cnt == 1 and cmd_array[0] == u'名单':
 		return get_classmate_list(cmd_array[1],msg)
-	elif cnt == 2 and cmd_array[0] == 'reg':
-	    return classmate_reg(msg)
+	elif cnt == 3 and cmd_array[0].lower() == 'reg' and cmd_array[1].lower() == 'admin':
+	    return admin_reg(cmd_array[2],msg)
+	elif cnt == 3 and cmd_array[0].lower() == 'reg' and cmd_array[1].lower() != 'admin':
+	    return classmate_reg(cmd_array[1], name, msg)
+	elif cnt == 1 and cmd_array[0].lower() == 'logout':
+	    return classmate_logout(msg)
+    elif cnt == 2 and cmd_array[0].lower() == 'logout' and cmd_array[1].lower() == 'admin':
+	    return admin_logout(msg)
 	elif cnt == 1:
 	    return query_person(cmd_array[0],msg)
     
