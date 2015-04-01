@@ -22,13 +22,14 @@ text_admin_exsited = '您已经注册为管理员了。'
 text_admin_reg_ok = '已成功将您注册为管理员。'
 text_classmate_exsited = '您已经注册为本班同学了。'
 text_classmate_reg_ok = '已成功将您注册为本班同学。'
-text_mod_paiban_ok = '已成功修改排班信息。'
+text_mod_info_ok = '已成功修改信息。'
 text_admin_logout_ok = '已将您的账号从管理员中注销。'
 text_classmate_logout_ok = '已将您的账号从同学名单中注销。'
 text_admin_help = '若您还没有注册为管理员，请回复“reg+空格+管理员密码”注册管理员。\n注册为管理员后，您可以进行以下操作：\n1、回复“reset+空格+新密码”设定新管理员密码；\n2、回复“logout”注销当前账号的管理员权限；\n3、回复“month+空格+月份（数字）”设置当前月份；\n4、回复“mod+空格+员工名+空格+数字日期+空格+新排班信息”修改指定员工在某日的排班信息。'
 text_month_ok = '已设置新的月份信息。'
 text_no_classmate_password = '班级密码还未设置，请联系班级管理员。'
 text_not_classmate = '您还未注册为本班同学。请先注册为本班同学。'
+text_no_attr_error = '您指定的信息项不存在。'
 
 
 db_char_max_len = 20

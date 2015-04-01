@@ -10,7 +10,7 @@ from django.http import HttpResponse
 from django import forms
 import hashlib
 import time
-import xlrd
+#import xlrd
 import os
 import models
 import re
@@ -21,11 +21,11 @@ sys.setdefaultencoding('utf8')
 
 token = 'catkingisagoodman'
 #info_filename = "http://paibantest.sinaapp.com/static/test.xlsx"
-info_filename = "test.xls"
-path_dir = os.path.dirname(__file__)
-info_filename = path_dir + '/' + info_filename
+#info_filename = "test.xls"
+#path_dir = os.path.dirname(__file__)
+#info_filename = path_dir + '/' + info_filename
 info_dict = {}
-file_tmp = path_dir + '/tmpfile.xlsx' 
+#file_tmp = path_dir + '/tmpfile.xlsx' 
 tmp_var = None
 
 """
@@ -144,7 +144,8 @@ def load_info(info_content):
                     print e
         except Exception, e:
             print e
-            
+
+"""			
 def get_info_dict():
     global info_dict
     if len(info_dict) == 0:
@@ -157,6 +158,8 @@ def get_month():
         return query.param_value
     except:
         return "未知"
+"""
+
 
 """
 put all the information into the TEXT response.
@@ -195,16 +198,6 @@ def query_person(query, user_id, msg):
         return get_msg_response(resource.text_no_person_error,msg)
 
     query_ret = query_rets[0]
-    
-    ret = ["姓名："]
-    ret.append(query_ret.name)
-    ret.append('\n性别：')
-    ret.append(query_ret.sex)
-    ret.append('\n地址：')
-    ret.append(query_ret.)
-    ret.append(date_info.info)
-    ret.append('\n排班信息：')
-    ret.append(query_ret.info)
 	
 	query_key = [('姓名',query_ret.name),('性别',query_ret.sex),('地址',query_ret.address),('联系电话',query_ret.tel),('QQ',query_ret.qq),('微信',query_ret.wechat),('邮箱',query_ret.email),('行业',query_ret.field),('公司',query_ret.company),('寄语',query_ret.words)]
 	ret = []
@@ -406,41 +399,34 @@ def handle_uploaded_file(request):
     return True
     
 """
-modify worker's schdule. only admin can do this.
+classmates could modify their own infomation.
 query:utf8 str,work's name
-date_num:int, date number
 new_info:utf8 str,new schdule
 msg:requst dict
 """    
-def modify_paiban(query, date_num, new_info, msg):
-    if not query_admin(msg['FromUserName'].text):
-        return get_msg_response(resource.text_no_author_error,msg)
+def modify_info(key, new_info, msg):
+    if not check_classmate(msg['FromUserName'].text):
+        return get_msg_response(resource.text_not_classmate,msg)
     
-    query_rets = models.paibantable.objects.filter(name = query, date = date_num)
+	person_name = models.classmate_wechat_id.objects.filter(wechat_id = msg['FromUserName'].text)
+    query_rets = models.classmate_info.objects.filter(name = person_name[0].name)
     if query_rets == None or len(query_rets) == 0:
-        return get_msg_response(resource.text_no_person_error,msg)
+        new_record = models.classmate_info(name = person_name[0].name)
+		if hasattr(new_record,key):
+		    setattr(new_record,key,new_info)
+			new_record.save()
+			return get_msg_response(resource.text_mod_info_ok,msg)
+		else:
+		    return get_msg_response(resource.text_no_attr_error,msg)
+		
     query_ret = query_rets[0]
-    query_ret.info = new_info
-    query_ret.save()
-    return get_msg_response(resource.text_mod_paiban_ok,msg)
-    
-"""
-new_month:int
-"""    
-def modify_month(new_month,msg):
-    if not query_admin(msg['FromUserName'].text):
-        return get_msg_response(resource.text_no_author_error,msg)
-    
-    if new_month < 1 or new_month > 12:
-        return get_msg_response(resource.text_cmd_error,msg)
-    mon = models.params.objects.filter(param_name = 'month')
-    if mon == None or len(mon) == 0:
-        mon = models.params(param_name = 'month', param_value = str(new_month))
-        mon.save()
+    if hasattr(query_ret,key):
+		setattr(query_ret,key,new_info)
+        query_ret.save()
+	    return get_msg_response(resource.text_mod_info_ok,msg)
     else:
-        mon[0].param_value = str(new_month)
-        mon[0].save()
-    return get_msg_response(resource.text_month_ok,msg)
+		return get_msg_response(resource.text_no_attr_error,msg)
+    
    
 """
 analysize the cmd from users and do the coordingnate actions.
@@ -481,6 +467,8 @@ def process_cmd(cmd,msg):
 	    return modify_password(cmd_array[1], False, msg)
 	elif cnt == 3 and cmd_array[0].lower() == 'reset' and cmd_array[1] == 'admin':
 	    return modify_password(cmd_array[2], True, msg)
+	elif cnt == 3 and cmd_array[0].lower() == 'set':
+	    return modify_info(cmd_array[1],cmd_array[2],msg)
 	elif cnt == 1:
 	    return query_person(cmd_array[0],msg)
     
