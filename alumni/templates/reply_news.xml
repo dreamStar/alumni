@@ -1,0 +1,19 @@
+<xml>
+<ToUserName><![CDATA[{{ToUserName}}]]></ToUserName>
+<FromUserName><![CDATA[{{FromUserName}}]]></FromUserName>
+<CreateTime>{{CreateTime}}</CreateTime>
+<MsgType><![CDATA[{{MsgType}}]]></MsgType>
+<ArticleCount>{{ArticleCount}}</ArticleCount>
+<Articles>
+{%for item in news_list%}
+<item>
+<Title><![CDATA[{{item.Title}}]]></Title> 
+<Description><![CDATA[{{item.Description}}]]></Description>
+{%if 'PicUrl' in item%}
+<PicUrl><![CDATA[{{item.PicUrl}}]]></PicUrl>
+{%endif%}
+<Url><![CDATA[{{item.Url}}]]></Url>
+</item>
+{%endfor%}
+</Articles>
+</xml> 

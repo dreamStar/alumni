@@ -1,0 +1,7 @@
+﻿<h1><b>二室之家上传页面</b></h1>
+<label><font size = '6' color = red>上传文件之前必须填写管理员密码和月份信息。如果信息不完整或密码不正确则需要重新填写。</font></label>
+<form enctype="multipart/form-data" method="POST" action="/paibaninfo/upload/"> 
+   {{form.as_p}}
+   <br /> 
+   <input type="submit" value="上传文件" /> 
+</form>
