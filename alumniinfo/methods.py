@@ -190,7 +190,7 @@ called when the requestion is querying a person's schedule.
 query: utf-8 str, the person's name
 msg: request dict.
 """
-def query_person(query, user_id, msg):
+def query_person(query, msg):
     if not check_classmate(msg['FromUserName'].text):
         return get_msg_response(resource.text_not_classmate,msg)
     query_rets = models.classmate_info.objects.filter(name = query)
