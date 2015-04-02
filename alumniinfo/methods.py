@@ -182,9 +182,9 @@ msg: request dict.
 """
 def get_classmate_list(msg):
     query_rets = models.classmate_info.objects.all()
-	names = [person.name + '\n' for person in query_rets if person.name != None and person.name != ""]
+    names = [person.name + '\n' for person in query_rets if person.name != None and person.name != ""]
     return get_msg_response("".join(names),msg)
-	
+
 """
 called when the requestion is querying a person's schedule.
 query: utf-8 str, the person's name
@@ -192,19 +192,19 @@ msg: request dict.
 """
 def query_person(query, user_id, msg):
     if not check_classmate(msg['FromUserName'].text):
-	    return get_msg_response(resource.text_not_classmate,msg)
+        return get_msg_response(resource.text_not_classmate,msg)
     query_rets = models.classmate_info.objects.filter(name = query)
     if query_rets == None or len(query_rets) == 0:
         return get_msg_response(resource.text_no_person_error,msg)
 
     query_ret = query_rets[0]
-	
-	query_key = [('姓名',query_ret.name),('性别',query_ret.sex),('地址',query_ret.address),('联系电话',query_ret.tel),('QQ',query_ret.qq),('微信',query_ret.wechat),('邮箱',query_ret.email),('行业',query_ret.field),('公司',query_ret.company),('寄语',query_ret.words)]
-	ret = []
-	for key in query_key:
-	    if key[1] != None and key[1] != "":
-		    ret.append(key[0]+':'+key[1]+'\n')
-	
+
+    query_key = [('姓名',query_ret.name),('性别',query_ret.sex),('地址',query_ret.address),('联系电话',query_ret.tel),('QQ',query_ret.qq),('微信',query_ret.wechat),('邮箱',query_ret.email),('行业',query_ret.field),('公司',query_ret.company),('寄语',query_ret.words)]
+    ret = []
+    for key in query_key:
+        if key[1] != None and key[1] != "":
+            ret.append(key[0]+':'+key[1]+'\n')
+    
     return get_msg_response("".join(ret),msg)
 """
 def query_person(query,date_num,msg):
@@ -251,13 +251,13 @@ user_id:int
 def check_classmate(user_id, name = None):
     tmp = models.classmate_wechat_id.objects.filter(wechat_id = user_id)
     if tmp and len(tmp) > 0 :
-	    if name != None:
-		    if tmp[0].name == name:
-                return True			
-		else:
+        if name != None:
+            if tmp[0].name == name:
+                return True
+        else:
             return True
     return False
-		
+
 """
 set new password
 new_pw:utf-8 str,new password, only letters and numbers, more than six characters.
@@ -269,11 +269,11 @@ def set_new_password(new_pw,msg = None,is_admin = True):
             return get_msg_response(resource.text_pw_format_error,msg)
         else:
             return False
-	pname = None
+    pname = None
     if is_admin:
-	    pname = 'admin_password'
-	else:
-	    pname = 'classmate_password'
+        pname = 'admin_password'
+    else:
+        pname = 'classmate_password'
     pw = models.params.objects.filter(param_name = pname)
     if pw and len(pw)>0:
         pw[0].param_value = new_pw
@@ -313,7 +313,7 @@ def admin_logout(msg):
         return get_msg_response(resource.text_admin_logout_ok,msg)
     else:
         return get_msg_response(resource.text_no_author_error,msg)
-		
+
 """
 classmate account register.
 pw:utf-8 str,password.
@@ -334,7 +334,7 @@ def classmate_reg(pw, name, msg):
                 return get_msg_response(resource.text_classmate_reg_ok,msg)
     else:
         return get_msg_response(resource.text_no_classmate_password,msg)
-		
+
 def classmate_logout(msg):
     tmp = models.classmate_wechat_id.objects.filter(wechat_id = msg['FromUserName'].text)
     if tmp and len(tmp) > 0 :
@@ -408,24 +408,24 @@ def modify_info(key, new_info, msg):
     if not check_classmate(msg['FromUserName'].text):
         return get_msg_response(resource.text_not_classmate,msg)
     
-	person_name = models.classmate_wechat_id.objects.filter(wechat_id = msg['FromUserName'].text)
+    person_name = models.classmate_wechat_id.objects.filter(wechat_id = msg['FromUserName'].text)
     query_rets = models.classmate_info.objects.filter(name = person_name[0].name)
     if query_rets == None or len(query_rets) == 0:
         new_record = models.classmate_info(name = person_name[0].name)
-		if hasattr(new_record,key):
-		    setattr(new_record,key,new_info)
-			new_record.save()
-			return get_msg_response(resource.text_mod_info_ok,msg)
-		else:
-		    return get_msg_response(resource.text_no_attr_error,msg)
-		
+        if hasattr(new_record,key):
+            setattr(new_record,key,new_info)
+            new_record.save()
+            return get_msg_response(resource.text_mod_info_ok,msg)
+        else:
+            return get_msg_response(resource.text_no_attr_error,msg)
+
     query_ret = query_rets[0]
     if hasattr(query_ret,key):
-		setattr(query_ret,key,new_info)
+        setattr(query_ret,key,new_info)
         query_ret.save()
-	    return get_msg_response(resource.text_mod_info_ok,msg)
+        return get_msg_response(resource.text_mod_info_ok,msg)
     else:
-		return get_msg_response(resource.text_no_attr_error,msg)
+        return get_msg_response(resource.text_no_attr_error,msg)
     
    
 """
@@ -436,7 +436,7 @@ msg:request dict.
 def process_cmd(cmd,msg):
     cmd_array = cmd.strip().split()
     cnt = len(cmd_array)
-	"""
+    """
     if cnt == 2 and cmd_array[0].lower() == 'reg':
         return admin_reg(cmd_array[1],msg)
     elif cnt == 1 and cmd_array[0].lower() == 'ad':
@@ -451,26 +451,26 @@ def process_cmd(cmd,msg):
         return modify_month(int(cmd_array[1]),msg)
     elif cnt == 2 and cmd_array[1].isdigit():
         return query_person(cmd_array[0],int(cmd_array[1]),msg)  
-	"""
-	
-	if cnt == 1 and cmd_array[0] == u'名单':
-		return get_classmate_list(cmd_array[1],msg)
-	elif cnt == 3 and cmd_array[0].lower() == 'reg' and cmd_array[1].lower() == 'admin':
-	    return admin_reg(cmd_array[2],msg)
-	elif cnt == 3 and cmd_array[0].lower() == 'reg' and cmd_array[1].lower() != 'admin':
-	    return classmate_reg(cmd_array[1], name, msg)
-	elif cnt == 1 and cmd_array[0].lower() == 'logout':
-	    return classmate_logout(msg)
+    """
+
+    if cnt == 1 and cmd_array[0] == u'名单':
+        return get_classmate_list(cmd_array[1],msg)
+    elif cnt == 3 and cmd_array[0].lower() == 'reg' and cmd_array[1].lower() == 'admin':
+        return admin_reg(cmd_array[2],msg)
+    elif cnt == 3 and cmd_array[0].lower() == 'reg' and cmd_array[1].lower() != 'admin':
+        return classmate_reg(cmd_array[1], name, msg)
+    elif cnt == 1 and cmd_array[0].lower() == 'logout':
+        return classmate_logout(msg)
     elif cnt == 2 and cmd_array[0].lower() == 'logout' and cmd_array[1].lower() == 'admin':
-	    return admin_logout(msg)
-	elif cnt == 2 and cmd_array[0].lower() == 'reset':
-	    return modify_password(cmd_array[1], False, msg)
-	elif cnt == 3 and cmd_array[0].lower() == 'reset' and cmd_array[1] == 'admin':
-	    return modify_password(cmd_array[2], True, msg)
-	elif cnt == 3 and cmd_array[0].lower() == 'set':
-	    return modify_info(cmd_array[1],cmd_array[2],msg)
-	elif cnt == 1:
-	    return query_person(cmd_array[0],msg)
+        return admin_logout(msg)
+    elif cnt == 2 and cmd_array[0].lower() == 'reset':
+        return modify_password(cmd_array[1], False, msg)
+    elif cnt == 3 and cmd_array[0].lower() == 'reset' and cmd_array[1] == 'admin':
+        return modify_password(cmd_array[2], True, msg)
+    elif cnt == 3 and cmd_array[0].lower() == 'set':
+        return modify_info(cmd_array[1],cmd_array[2],msg)
+    elif cnt == 1:
+        return query_person(cmd_array[0],msg)
     
     return get_msg_response(resource.text_cmd_error,msg)
     
