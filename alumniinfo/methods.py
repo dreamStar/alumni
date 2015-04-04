@@ -262,7 +262,7 @@ def check_classmate(user_id, name = None):
 set new password
 new_pw:utf-8 str,new password, only letters and numbers, more than six characters.
 """
-def set_new_password(new_pw,msg = None,is_admin = True):
+def set_new_password(new_pw,is_admin = True, msg = None):
     pattern = re.compile('^[0-9a-zA-Z]{6,}$',re.I)
     if not pattern.match(new_pw):
         if msg:
@@ -297,7 +297,7 @@ def admin_reg(pw,msg):
         if right_pw[0].param_value != pw:
             return get_msg_response(resource.text_pw_error,msg)
         else:
-            if query_admin(msg['FromUserName'].text):
+            if check_admin(msg['FromUserName'].text):
                 return get_msg_response(resource.text_admin_exsited,msg)
             else:
                 new_admin = models.admin_id(wechat_id = msg['FromUserName'].text)
@@ -410,6 +410,9 @@ def modify_info(key, new_info, msg):
     
     person_name = models.classmate_wechat_id.objects.filter(wechat_id = msg['FromUserName'].text)
     query_rets = models.classmate_info.objects.filter(name = person_name[0].name)
+    key = key.lower()
+    if key == 'name':
+        return get_msg_response(resource.text_modify_name_error,msg)
     if query_rets == None or len(query_rets) == 0:
         new_record = models.classmate_info(name = person_name[0].name)
         if hasattr(new_record,key):
@@ -453,12 +456,12 @@ def process_cmd(cmd,msg):
         return query_person(cmd_array[0],int(cmd_array[1]),msg)  
     """
 
-    if cnt == 1 and cmd_array[0] == u'名单':
-        return get_classmate_list(cmd_array[1],msg)
+    if cnt == 1 and cmd_array[0] == 'list': #u'名单':
+        return get_classmate_list(msg)
     elif cnt == 3 and cmd_array[0].lower() == 'reg' and cmd_array[1].lower() == 'admin':
         return admin_reg(cmd_array[2],msg)
     elif cnt == 3 and cmd_array[0].lower() == 'reg' and cmd_array[1].lower() != 'admin':
-        return classmate_reg(cmd_array[2], name, msg)
+        return classmate_reg(cmd_array[2], cmd_array[1], msg)
     elif cnt == 1 and cmd_array[0].lower() == 'logout':
         return classmate_logout(msg)
     elif cnt == 2 and cmd_array[0].lower() == 'logout' and cmd_array[1].lower() == 'admin':
