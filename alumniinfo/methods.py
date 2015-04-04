@@ -458,7 +458,7 @@ def process_cmd(cmd,msg):
     elif cnt == 3 and cmd_array[0].lower() == 'reg' and cmd_array[1].lower() == 'admin':
         return admin_reg(cmd_array[2],msg)
     elif cnt == 3 and cmd_array[0].lower() == 'reg' and cmd_array[1].lower() != 'admin':
-        return classmate_reg(cmd_array[1], name, msg)
+        return classmate_reg(cmd_array[2], name, msg)
     elif cnt == 1 and cmd_array[0].lower() == 'logout':
         return classmate_logout(msg)
     elif cnt == 2 and cmd_array[0].lower() == 'logout' and cmd_array[1].lower() == 'admin':

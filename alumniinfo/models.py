@@ -2,7 +2,7 @@ from django.db import models
 from django import forms
 
 # Create your models here.
-class param(models.Model):
+class params(models.Model):
     param_name = models.CharField(max_length=50, unique = True)
     param_value = models.TextField()
     
