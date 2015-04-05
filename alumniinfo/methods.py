@@ -326,7 +326,7 @@ def classmate_reg(pw, name, msg):
         if right_pw[0].param_value != pw:
             return get_msg_response(resource.text_pw_error,msg)
         else:
-            if check_classmate(msg['FromUserName'].text):
+            if check_classmate(msg['FromUserName'].text,name):
                 return get_msg_response(resource.text_classmate_exsited,msg)
             else:
                 new_classmate = models.classmate_wechat_id(wechat_id = msg['FromUserName'].text, name = name)
