@@ -30,6 +30,6 @@ text_month_ok = '已设置新的月份信息。'
 text_no_classmate_password = '班级密码还未设置，请联系班级管理员。'
 text_not_classmate = '您还未注册为本班同学。请先注册为本班同学。'
 text_no_attr_error = '您指定的信息项不存在。'
-test_modify_name_error = "can't modify name."
+text_modify_name_error = "can't modify name."
 
 db_char_max_len = 20
