@@ -183,6 +183,8 @@ msg: request dict.
 def get_classmate_list(msg):
     query_rets = models.classmate_info.objects.all()
     names = [person.name + '\n' for person in query_rets if person.name != None and person.name != ""]
+    if names != []:
+        names[-1] = names[-1][:-1]
     return get_msg_response("".join(names),msg)
 
 """
@@ -203,7 +205,10 @@ def query_person(query, msg):
     ret = []
     for key in query_key:
         if key[1] != None and key[1] != "":
-            ret.append(key[0]+':'+key[1]+'\n')
+            ret.append(key[0]+':'+key[1])
+            ret.append('\n')
+    if ret != []:
+        ret = ret[:-1]
     
     return get_msg_response("".join(ret),msg)
 """
